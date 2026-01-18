@@ -14,34 +14,49 @@ const massegeEmail = ref("");
 const massegePassword = ref("");
 const massegeConfirmPassword = ref("");
 
+// دالة التحقق من صيغة الإيميل
 const validateEmail = (email) => {
   const re = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
   return re.test(String(email).toLowerCase());
 };
 
+// دالة التحقق من وجود حروف وأرقام في الباسورد
+const validatePasswordStrength = (pass) => {
+  // التعبير ده بيتأكد إن فيه حرف واحد ورقم واحد على الأقل
+  const re = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/;
+  return re.test(pass);
+};
+
 async function register() {
+  // 1. تصفير الرسائل عند كل ضغطة
   massegeEmail.value = "";
   massegePassword.value = "";
   massegeConfirmPassword.value = "";
 
   let valid = true;
 
+  // 2. التحقق من الإيميل
   if (!email.value) {
     massegeEmail.value = "please enter email";
     valid = false;
   } else if (!validateEmail(email.value)) {
-    massegeEmail.value = "Invalid email";
+    massegeEmail.value = "Invalid email format";
     valid = false;
   }
 
+  // 3. التحقق من الباسورد (طول + قوة)
   if (!password.value) {
     massegePassword.value = "please enter password";
     valid = false;
   } else if (password.value.length < 8) {
     massegePassword.value = "password must be at least 8 characters";
     valid = false;
+  } else if (!validatePasswordStrength(password.value)) {
+    massegePassword.value = "password must contain both letters and numbers";
+    valid = false;
   }
 
+  // 4. التأكد من تطابق الباسورد
   if (!confirmPassword.value) {
     massegeConfirmPassword.value = "please confirm password";
     valid = false;
@@ -50,20 +65,25 @@ async function register() {
     valid = false;
   }
 
+  // لو فيه أي خطأ في الإدخال بنوقف هنا
   if (!valid) return;
 
   try {
+    // 5. محاولة التسجيل في فايربيس
     await createUserWithEmailAndPassword(auth, email.value, password.value);
+
+    // لو نجح بنوديه لصفحة الهوم
     router.push({ name: "home" });
   } catch (error) {
+    // 6. التعامل مع أخطاء السيرفر (Firebase Errors)
+    console.error("Firebase Error:", error.code);
+
     if (error.code === "auth/email-already-in-use") {
       massegeEmail.value = "This email is already registered";
-    } else if (error.code === "auth/invalid-email") {
-      massegeEmail.value = "Invalid email address";
-    } else if (error.code === "auth/weak-password") {
-      massegePassword.value = "Password is too weak";
+    } else if (error.code === "auth/network-request-failed") {
+      massegeEmail.value = "Check your internet connection";
     } else {
-      massegeEmail.value = "Something went wrong, try again";
+      massegeEmail.value = "An error occurred. Please try again later";
     }
   }
 }
