@@ -1,69 +1,69 @@
 <script setup>
-import { ref } from "vue"
-import { createUserWithEmailAndPassword } from "firebase/auth"
-import { useRouter } from "vue-router"
-import { auth } from "@/firebase/config"
+import { ref } from "vue";
+import { createUserWithEmailAndPassword } from "firebase/auth";
+import { useRouter } from "vue-router";
+import { auth } from "@/firebase/config";
 
-const router = useRouter()
+const router = useRouter();
 
-const email = ref("")
-const password = ref("")
-const confirmPassword = ref("")
+const email = ref("");
+const password = ref("");
+const confirmPassword = ref("");
 
-const massegeEmail = ref("")
-const massegePassword = ref("")
-const massegeConfirmPassword = ref("")
+const massegeEmail = ref("");
+const massegePassword = ref("");
+const massegeConfirmPassword = ref("");
 
 const validateEmail = (email) => {
-  const re = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/
-  return re.test(String(email).toLowerCase())
-}
+  const re = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+  return re.test(String(email).toLowerCase());
+};
 
 async function register() {
-  massegeEmail.value = ""
-  massegePassword.value = ""
-  massegeConfirmPassword.value = ""
+  massegeEmail.value = "";
+  massegePassword.value = "";
+  massegeConfirmPassword.value = "";
 
-  let valid = true
+  let valid = true;
 
   if (!email.value) {
-    massegeEmail.value = "please enter email"
-    valid = false
+    massegeEmail.value = "please enter email";
+    valid = false;
   } else if (!validateEmail(email.value)) {
-    massegeEmail.value = "Invalid email"
-    valid = false
+    massegeEmail.value = "Invalid email";
+    valid = false;
   }
 
   if (!password.value) {
-    massegePassword.value = "please enter password"
-    valid = false
+    massegePassword.value = "please enter password";
+    valid = false;
   } else if (password.value.length < 8) {
-    massegePassword.value = "password must be at least 8 characters"
-    valid = false
+    massegePassword.value = "password must be at least 8 characters";
+    valid = false;
   }
 
   if (!confirmPassword.value) {
-    massegeConfirmPassword.value = "please confirm password"
-    valid = false
+    massegeConfirmPassword.value = "please confirm password";
+    valid = false;
   } else if (confirmPassword.value !== password.value) {
-    massegeConfirmPassword.value = "passwords do not match"
-    valid = false
+    massegeConfirmPassword.value = "passwords do not match";
+    valid = false;
   }
 
-  if (!valid) return
+  if (!valid) return;
 
   try {
-    await createUserWithEmailAndPassword(auth, email.value, password.value)
-    router.push({ name: "home" })
+    await createUserWithEmailAndPassword(auth, email.value, password.value);
+    router.push({ name: "home" });
   } catch (error) {
     if (error.code === "auth/email-already-in-use") {
-      massegeEmail.value = "This email is already registered"
+      massegeEmail.value = "This email is already registered";
     } else if (error.code === "auth/invalid-email") {
-      massegeEmail.value = "Invalid email address"
+      massegeEmail.value = "Invalid email address";
     } else if (error.code === "auth/weak-password") {
-      massegePassword.value = "Password is too weak"
+      massegePassword.value = "Password is too weak";
     } else {
-      massegeEmail.value = "Something went wrong, try again"
+      massegeEmail.value = "Something went wrong, try again";
     }
   }
 }
@@ -117,9 +117,7 @@ async function register() {
                 </small>
               </div>
 
-              <button type="submit" class="btn-register w-100">
-                Register Now
-              </button>
+              <button type="submit" class="btn-register w-100">Register Now</button>
             </form>
 
             <p class="text-center mt-4 text-white-50 small">
@@ -166,7 +164,7 @@ async function register() {
   border: 1px solid rgba(255, 255, 255, 0.2);
   box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
   padding: 40px;
-   clip-path: polygon(10% 0, 100% 0, 100% 90%, 90% 100%, 0 100%, 0 10%);
+  clip-path: polygon(10% 0, 100% 0, 100% 90%, 90% 100%, 0 100%, 0 10%);
   transition: transform 0.3s ease;
 }
 
