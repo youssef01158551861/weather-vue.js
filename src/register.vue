@@ -122,7 +122,7 @@ async function register() {
 
             <p class="text-center mt-4 text-white-50 small">
               Already have an account?
-              <router-link to="/login" class="login-link">Login</router-link>
+              <router-link to="/" class="login-link">Login</router-link>
             </p>
           </div>
         </div>
