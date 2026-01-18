@@ -1,0 +1,209 @@
+<script setup>
+import { ref } from "vue"
+import { signInWithEmailAndPassword } from "firebase/auth"
+import { useRouter } from "vue-router"
+import { auth } from "@/firebase/config"
+
+const router = useRouter()
+
+const email = ref("")
+const password = ref("")
+
+const massegeEmail = ref("")
+const massegePassword = ref("")
+
+const validateEmail = (email) => {
+  const re = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/
+  return re.test(String(email).toLowerCase())
+}
+
+async function register() {
+  massegeEmail.value = ""
+  massegePassword.value = ""
+
+  let valid = true
+
+  if (!email.value) {
+    massegeEmail.value = "please enter email"
+    valid = false
+  } else if (!validateEmail(email.value)) {
+    massegeEmail.value = "Invalid email"
+    valid = false
+  }
+
+  if (!password.value) {
+    massegePassword.value = "please enter password"
+    valid = false
+  } else if (password.value.length < 8) {
+    massegePassword.value = "password must be at least 8 characters"
+    valid = false
+  }
+
+  if (!valid) return
+
+  try {
+    await signInWithEmailAndPassword(auth, email.value, password.value)
+    router.push({ name: "home" })
+  } catch (error) {
+    if (error.code === "auth/email-already-in-use") {
+      massegeEmail.value = "This email is already registered"
+    } else if (error.code === "auth/invalid-email") {
+      massegeEmail.value = "Invalid email address"
+    } else if (error.code === "auth/weak-password") {
+      massegePassword.value = "Password is too weak"
+    } else {
+      massegeEmail.value = "Something went wrong, try again"
+    }
+  }
+}
+</script>
+
+<template>
+  <div class="register-wrapper">
+    <div class="container">
+      <div class="row justify-content-center">
+        <div class="col-lg-5 col-md-7 col-sm-10">
+          <div class="glass-card">
+            <h2 class="text-center form-title">login</h2>
+
+            <form @submit.prevent="register">
+              <div class="form-group mb-3 text-start">
+                <label class="form-label">Email Address</label>
+                <input
+                  type="email"
+                  v-model="email"
+                  class="form-control custom-input"
+                  placeholder="name@example.com"
+                />
+                <small class="text-danger" v-if="massegeEmail">
+                  {{ massegeEmail }}
+                </small>
+              </div>
+
+              <div class="form-group mb-3 text-start">
+                <label class="form-label">Password</label>
+                <input
+                  type="password"
+                  v-model="password"
+                  class="form-control custom-input"
+                  placeholder="••••••••"
+                />
+                <small class="text-danger" v-if="massegePassword">
+                  {{ massegePassword }}
+                </small>
+              </div>
+
+              <button type="submit" class="btn-register w-100">
+                Register Now
+              </button>
+            </form>
+
+            <p class="text-center mt-4 text-white-50 small">
+              Don't have an account?
+              <router-link to="/register" class="login-link">Register</router-link>
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</template>
+
+<style scoped>
+.register-wrapper {
+  font-family: "Segoe UI", sans-serif;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(-45deg, #00c6ff, #0072ff, #00c6ff, #0072ff);
+  background-size: 400% 400%;
+  animation: gradientBG 15s ease infinite;
+  padding: 20px;
+}
+
+@keyframes gradientBG {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+.glass-card {
+  background: rgba(255, 255, 255, 0.12);
+  backdrop-filter: blur(15px);
+  -webkit-backdrop-filter: blur(15px);
+  border-radius: 30px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
+  padding: 40px;
+ clip-path: polygon(10% 0, 100% 0, 100% 90%, 90% 100%, 0 100%, 0 10%);
+  transition: transform 0.3s ease;
+}
+
+.form-title {
+  color: #ffffff;
+  font-weight: 800;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  margin-bottom: 30px;
+}
+
+.form-label {
+  color: rgba(255, 255, 255, 0.85);
+  font-size: 0.9rem;
+  margin-bottom: 8px;
+  margin-left: 5px;
+}
+
+.custom-input {
+  background: rgba(255, 255, 255, 0.1) !important;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 12px;
+  padding: 12px 15px;
+  color: white !important;
+}
+
+.custom-input:focus {
+  background: rgba(255, 255, 255, 0.2) !important;
+  border-color: rgba(255, 255, 255, 0.5);
+  box-shadow: 0 0 15px rgba(255, 255, 255, 0.1);
+  outline: none;
+}
+
+.btn-register {
+  background: #ffffff;
+  color: #0072ff;
+  border: none;
+  padding: 14px;
+  border-radius: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  transition: all 0.3s ease;
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+}
+
+.btn-register:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 15px 30px rgba(255, 255, 255, 0.2);
+  background: #f8f9fa;
+}
+
+.login-link {
+  color: #ffffff;
+  font-weight: 700;
+  text-decoration: none;
+  border-bottom: 1px solid white;
+}
+
+.text-danger {
+  color: #ffb3b3 !important;
+  font-size: 0.75rem;
+  margin-top: 5px;
+  font-weight: 600;
+}
+</style>
